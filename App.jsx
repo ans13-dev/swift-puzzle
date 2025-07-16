@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react"
 import { clsx } from "clsx"
-import { languages } from "./languages"
 import { getRandomSong } from "./utils"
 import { albumList } from "./albumList"
 import Confetti from "react-confetti"
@@ -14,6 +13,7 @@ export default function GussTheSwift() {
     const [currentSong, setCurrentSong] = useState("")
     const [currentAlbum, setCurrentAlbum] = useState("")
     const [guessedLetters, setGuessedLetters] = useState([])
+    const hitPoints = ["💚", "💛", "💜", "❤️", "💙", "🖤", "💖", "🤍"]
 
     // Derived values
     const numGuessesLeft = 8
@@ -54,15 +54,15 @@ export default function GussTheSwift() {
         loadRandomSong()
     }
 
-    const languageElements = languages.map((lang, index) => {
+    const hitPointsElements = hitPoints.map((hp, index) => {
         const isLanguageLost = index < wrongGuessCount
         const className = clsx("chip", isLanguageLost && "lost")
         return (
             <span
                 className={className}
-                key={lang.name}
+                key={hp}
             >
-                {lang.name}
+                {hp}
             </span>
         )
     })
@@ -80,11 +80,20 @@ export default function GussTheSwift() {
                     </span>
                 )
             } else {
-                return (
-                    <span key={index} className="non-letter">
-                        {letter}
-                    </span>
-                )
+                if (letter == " ") {
+                    return (
+                        <span key={index} className="space-letter">
+                            {letter}
+                        </span>
+                    )
+                }
+                else {
+                    return (
+                        <span key={index} className="non-letter">
+                            {letter}
+                        </span>
+                    )
+                }
             }
 
         }
@@ -126,7 +135,9 @@ export default function GussTheSwift() {
                     {`You have ${numGuessesLeft - wrongGuessCount} chances left`}
                     {wrongGuessCount == 7 ? <div class="tooltip-wrapper">
                         <span class="tooltip-icon">💡</span>
-                        <div class="tooltip-text">{`Hint: The Song is in the Album "${currentAlbum}".`}</div>
+                        <div class="tooltip-text">
+                            {`Hint: The Song is in the Album "${currentAlbum}".`}
+                        </div>
                     </div> : null}
                 </p>
             )
@@ -152,7 +163,7 @@ export default function GussTheSwift() {
             <header>
                 <h1>Guess the Swift 🎵</h1>
                 <p>Guess a Taylor Swift song in 8 attempts</p>
-                <section className="life-chips">{languageElements}</section>
+                <section className="life-chips">{hitPointsElements}</section>
             </header>
 
             <section className="word">

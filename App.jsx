@@ -145,12 +145,28 @@ export default function GussTheSwift() {
 
         if (isGameWon) {
             return (
-                <h2>You win ! 🎉</h2>
+                <span>
+                    <h2>You win ! 🎉</h2>
+                    <button
+                        className="new-game"
+                        onClick={startNewGame}
+                    >
+                        New Game
+                    </button>
+                </span>
             )
         }
         if (isGameLost) {
             return (
-                <h2>Game over ! ☠️</h2>
+                <span>
+                    <h2>Game over ! ☠️</h2>
+                    <button
+                        className="new-game"
+                        onClick={startNewGame}
+                    >
+                        New Game
+                    </button>
+                </span>
             )
         }
 
@@ -182,12 +198,6 @@ export default function GussTheSwift() {
             <section className="keyboard">
                 {keyboardElements}
             </section>
-
-            {isGameOver &&
-                <button
-                    className="new-game"
-                    onClick={startNewGame}
-                >New Game</button>}
         </main>
     )
 }

@@ -1,10 +1,3 @@
-import { words } from "./words"
-
-export function getRandomWord() {
-    const randomIndex = Math.floor(Math.random() * words.length)
-    return words[randomIndex]
-}
-
 export async function getRandomSong() {
     try {
         const res = await fetch("https://taylor-swift-api.sarbo.workers.dev/songs");

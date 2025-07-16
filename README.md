@@ -1,5 +1,5 @@
 # Preview
-[# Getting Started](https://gentle-pixie-b40f42.netlify.app/)
+[# Click this](https://gentle-pixie-b40f42.netlify.app/)
 
 # Getting Started
 Install the dependencies and run the project

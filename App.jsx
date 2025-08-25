@@ -3,25 +3,34 @@ import { clsx } from "clsx"
 import { getRandomSong } from "./utils"
 import { albumList } from "./albumList"
 import Confetti from "react-confetti"
-
+import { useWindowSize } from "./utils"
 
 export default function GussTheSwift() {
     // State values
-    useEffect(() => {
-        loadRandomSong()
-    }, [])
+    const hitPoints = ["💚", "💛", "💜", "❤️", "💙", "🖤", "🤍"]
+    const encouragePhrases = [
+        "Look what you just did.",
+        "You're so gorgeous!",
+        "This is our song.",
+        "Crushed it!",
+        "Swiftie power!",
+        "Legendary.",
+        "So iconic.",
+        "You nailed it!"
+    ]
+    const [isInitialized, setIsInitialized] = useState(false)
     const [currentSong, setCurrentSong] = useState("")
     const [currentAlbum, setCurrentAlbum] = useState("")
     const [guessedLetters, setGuessedLetters] = useState([])
-    const hitPoints = ["💚", "💛", "💜", "❤️", "💙", "🖤", "💖", "🤍"]
+    const { width, height } = useWindowSize()
 
     // Derived values
-    const numGuessesLeft = 8
+    const numGuessesLeft = 7
+    const currentSongLetters = new Set(currentSong.toLowerCase().match(/[a-z]/g) || []);
     const wrongGuessCount =
         guessedLetters.filter(letter => !currentSong.toLowerCase().includes(letter)).length
-    const isGameWon =
-        currentSong.toLowerCase().split("").filter(char => /^[a-zA-Z]$/.test(char)).every(letter => guessedLetters.includes(letter))
-    const isGameLost = wrongGuessCount >= numGuessesLeft
+    const isGameWon = isInitialized && [...currentSongLetters].every(letter => guessedLetters.includes(letter));
+    const isGameLost = isInitialized && wrongGuessCount >= numGuessesLeft
     const isGameOver = isGameWon || isGameLost
     const lastGuessedLetter = guessedLetters[guessedLetters.length - 1]
     const isLastGuessIncorrect = lastGuessedLetter && !currentSong.toLowerCase().includes(lastGuessedLetter)
@@ -29,8 +38,17 @@ export default function GussTheSwift() {
     // Static values
     const alphabet = "abcdefghijklmnopqrstuvwxyz"
 
+    useEffect(() => {
+        loadRandomSong().then(() => setIsInitialized(true))
+    }, [])
+
     function isLetter(char) {
         return /^[A-Z]$/i.test(char);
+    }
+
+    function getRandomPhrase(phrases) {
+        const randomIndex = Math.floor(Math.random() * phrases.length);
+        return phrases[randomIndex];
     }
 
     async function loadRandomSong() {
@@ -54,50 +72,33 @@ export default function GussTheSwift() {
         loadRandomSong()
     }
 
-    const hitPointsElements = hitPoints.map((hp, index) => {
-        const isLanguageLost = index < wrongGuessCount
-        const className = clsx("chip", isLanguageLost && "lost")
-        return (
-            <span
-                className={className}
-                key={hp}
-            >
-                {hp}
-            </span>
-        )
-    })
+    const songElements = currentSong.split(" ").map((word, wi) => (
+        <span key={wi} className="word-block">
+            {word.split("").map((letter, li) => {
+                const shouldRevealLetter =
+                    isGameLost || guessedLetters.includes(letter.toLowerCase());
+                const letterClassName = clsx(
+                    isGameLost &&
+                    !guessedLetters.includes(letter.toLowerCase()) &&
+                    "missed-letter"
+                );
 
-    const songElements = currentSong.split("").map(
-        (letter, index) => {
-            const shouldRevealLetter = isGameLost || guessedLetters.includes(letter.toLowerCase())
-            const letterClassName = clsx(
-                isGameLost && !guessedLetters.includes(letter.toLowerCase()) && "missed-letter"
-            )
-            if (isLetter(letter)) {
-                return (
-                    <span key={index} className={letterClassName}>
-                        {shouldRevealLetter ? letter : ""}
-                    </span>
-                )
-            } else {
-                if (letter == " ") {
+                if (isLetter(letter)) {
                     return (
-                        <span key={index} className="space-letter">
+                        <span key={li} className={letterClassName}>
+                            {shouldRevealLetter ? letter : ""}
+                        </span>
+                    );
+                } else {
+                    return (
+                        <span key={li} className="non-letter">
                             {letter}
                         </span>
-                    )
+                    );
                 }
-                else {
-                    return (
-                        <span key={index} className="non-letter">
-                            {letter}
-                        </span>
-                    )
-                }
-            }
-
-        }
-    )
+            })}
+        </span>
+    ));
 
     const keyboardElements = alphabet.split("").map(letter => {
         const isGuessed = guessedLetters.includes(letter)
@@ -122,31 +123,21 @@ export default function GussTheSwift() {
         )
     })
 
-    const gameStatusClass = clsx("game-status", {
-        won: isGameWon,
-        lost: isGameLost,
-        farewell: !isGameOver && isLastGuessIncorrect
-    })
-
     function renderGameStatus() {
         if (!isGameOver && isLastGuessIncorrect) {
             return (
-                <p className="farewell-message">
-                    {`You have ${numGuessesLeft - wrongGuessCount} chances left`}
-                    {wrongGuessCount == 7 ? <div class="tooltip-wrapper">
-                        <span class="tooltip-icon">💡</span>
-                        <div class="tooltip-text">
-                            {`Hint: The Song is in the Album "${currentAlbum}".`}
-                        </div>
-                    </div> : null}
-                </p>
+                <span className="game-result">
+                    <h3>
+                        {`You have ${numGuessesLeft - wrongGuessCount} chances left`}
+                    </h3>
+                </span>
             )
         }
 
         if (isGameWon) {
             return (
-                <span>
-                    <h2>You win ! 🎉</h2>
+                <span className="game-result">
+                    <h3>You win ! 🎉</h3>
                     <button
                         className="new-game"
                         onClick={startNewGame}
@@ -158,8 +149,8 @@ export default function GussTheSwift() {
         }
         if (isGameLost) {
             return (
-                <span>
-                    <h2>Game over ! ☠️</h2>
+                <span className="game-result">
+                    <h3>Game over ! ☠️</h3>
                     <button
                         className="new-game"
                         onClick={startNewGame}
@@ -170,17 +161,42 @@ export default function GussTheSwift() {
             )
         }
 
-        return null
+        if (!isGameOver && wrongGuessCount == 0 && guessedLetters == 0) {
+            return <span className="game-result">
+                <h3>Are you ready for it?</h3>
+            </span>
+        }
+
+        return <span className="game-result">
+            <h3>{getRandomPhrase(encouragePhrases)}</h3>
+        </span>
     }
 
     return (
         <main>
-            {isGameWon && <Confetti />}
+            {isGameWon && <Confetti width={width} height={height} />}
             <header>
-                <h1>Guess the Swift 🎵</h1>
-                <p>Guess a Taylor Swift song in 8 attempts</p>
-                <section className="life-chips">{hitPointsElements}</section>
+                <h1>Guess a Taylor Swift's Song: 7 Tries</h1>
+                {wrongGuessCount == 6 ? <div className="tooltip-wrapper">
+                    <span className="tooltip-icon-shine">🎵</span>
+                    <div className="tooltip-text">
+                        {`Hint: The Song is in the Album "${currentAlbum}".`}
+                    </div>
+                </div> : <div className="tooltip-wrapper">
+                    <span className="tooltip-icon">🎵</span>
+                </div>}
             </header>
+
+            <section className="lives">
+                {hitPoints.map((h, i) => (
+                    <span
+                        key={i}
+                        className={`heart ${i < hitPoints.length - wrongGuessCount ? "alive" : "dead"}`}
+                    >
+                        {h}
+                    </span>
+                ))}
+            </section>
 
             <section className="word">
                 {songElements}
@@ -190,7 +206,7 @@ export default function GussTheSwift() {
             <section
                 aria-live="polite"
                 role="status"
-                className={gameStatusClass}
+                className="game-status"
             >
                 {renderGameStatus()}
             </section>
@@ -198,6 +214,14 @@ export default function GussTheSwift() {
             <section className="keyboard">
                 {keyboardElements}
             </section>
-        </main>
+            <footer className="app-footer">
+                <p>
+                    © 2025 ans13-dev ·
+                    <a href="https://github.com/ans13-dev/swift-puzzle" target="_blank" rel="noopener noreferrer">
+                        GitHub
+                    </a>
+                </p>
+            </footer>
+        </main >
     )
 }

@@ -100,11 +100,16 @@ export default function GussTheSwift() {
                 prevLetters :
                 [...prevLetters, letter]
         )
+
     }
 
     function startNewGame() {
         setGuessedLetters([])
         loadRandomSong()
+        trackEvent("new_game", {
+            song: currentSong,
+            album: currentAlbum
+        })
     }
 
     const songElements = currentSong.split(" ").map((word, wi) => (
@@ -182,6 +187,11 @@ export default function GussTheSwift() {
 
     function renderGameStatus() {
         if (!isGameOver && isLastGuessIncorrect) {
+            trackEvent("wrong_guess", {
+                song: currentSong,
+                album: currentAlbum,
+                wrongCount: wrongGuessCount + 1
+            })
             return (
                 <span className="game-result">
                     <h4>
@@ -192,6 +202,12 @@ export default function GussTheSwift() {
         }
 
         if (isGameWon) {
+            trackEvent("game_won", {
+                song: currentSong,
+                album: currentAlbum,
+                totalWrongGuesses: wrongGuessCount,
+                totalGuesses: guessedLetters.length
+            })
             return (
                 <span className="game-result">
                     <h4 className="flip-text" onClick={startNewGame}>{showNewGame ? "New Game ✨" : "You win ! 🎉"}</h4>
@@ -199,6 +215,12 @@ export default function GussTheSwift() {
             )
         }
         if (isGameLost) {
+            trackEvent("game_lost", {
+                song: currentSong,
+                album: currentAlbum,
+                totalWrongGuesses: wrongGuessCount,
+                totalGuesses: guessedLetters.length
+            })
             return (
                 <span className="game-result">
                     <h4 className="flip-text" onClick={startNewGame}>{showNewGame ? "New Game ✨" : "Game over ! ☠️"}</h4>
@@ -215,6 +237,15 @@ export default function GussTheSwift() {
         return <span className="game-result">
             <h4>{getRandomPhrase(encouragePhrases)}</h4>
         </span>
+    }
+
+    //Add GA4
+    function trackEvent(eventName, params = {}) {
+        if (window.gtag) {
+            window.gtag("event", eventName, params)
+        } else {
+            console.warn("GA4 not loaded yet:", eventName, params)
+        }
     }
 
     return (

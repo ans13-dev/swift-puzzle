@@ -4,6 +4,9 @@ import { getRandomSong } from "./utils"
 import { albumList } from "./albumList"
 import Confetti from "react-confetti"
 import { useWindowSize } from "./utils"
+import ReactGA from 'react-ga4';
+const TRACKING_ID = "G-P31J01WKGG";
+
 
 export default function GussTheSwift() {
     // Static values
@@ -55,6 +58,10 @@ export default function GussTheSwift() {
 
 
     useEffect(() => {
+        ReactGA.initialize(TRACKING_ID);
+        ReactGA.send({
+            hitType: "pageview", page: "/landingpage", title: "Landing Page"
+        })
         const interval = setInterval(() => {
             setShowNewGame(prev => !prev);
         }, 2000); // 每2秒切換一次
@@ -106,10 +113,6 @@ export default function GussTheSwift() {
     function startNewGame() {
         setGuessedLetters([])
         loadRandomSong()
-        trackEvent("new_game", {
-            song: currentSong,
-            album: currentAlbum
-        })
     }
 
     const songElements = currentSong.split(" ").map((word, wi) => (
@@ -187,10 +190,13 @@ export default function GussTheSwift() {
 
     function renderGameStatus() {
         if (!isGameOver && isLastGuessIncorrect) {
-            trackEvent("wrong_guess", {
+            ReactGA.event("game_lost", {
+                category: "Game",
+                label: "lose",
                 song: currentSong,
                 album: currentAlbum,
-                wrongCount: wrongGuessCount + 1
+                totalWrongGuesses: wrongGuessCount,
+                totalGuesses: guessedLetters.length
             })
             return (
                 <span className="game-result">
@@ -202,7 +208,9 @@ export default function GussTheSwift() {
         }
 
         if (isGameWon) {
-            trackEvent("game_won", {
+            ReactGA.event("game_won", {
+                category: "Game",
+                label: "won",
                 song: currentSong,
                 album: currentAlbum,
                 totalWrongGuesses: wrongGuessCount,
@@ -215,7 +223,7 @@ export default function GussTheSwift() {
             )
         }
         if (isGameLost) {
-            trackEvent("game_lost", {
+            ReactGA.event("game_lost", {
                 song: currentSong,
                 album: currentAlbum,
                 totalWrongGuesses: wrongGuessCount,
@@ -240,13 +248,9 @@ export default function GussTheSwift() {
     }
 
     //Add GA4
-    function trackEvent(eventName, params = {}) {
-        if (window.gtag) {
-            window.gtag("event", eventName, params)
-        } else {
-            console.warn("GA4 not loaded yet:", eventName, params)
-        }
-    }
+    ReactGA.send({ hitType: "pageview", page: window.location.pathname });
+
+
 
     return (
         <main>

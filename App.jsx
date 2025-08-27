@@ -5,6 +5,18 @@ import { albumList } from "./albumList"
 import Confetti from "react-confetti"
 import { useWindowSize } from "./utils"
 
+function trackEvent(eventName, params = {}) {
+    if (window.dataLayer) {
+        window.dataLayer.push({
+            event: eventName,
+            ...params
+        });
+        console.log("DataLayer event pushed:", eventName, params);
+    } else {
+        console.warn("DataLayer not loaded yet:", eventName, params);
+    }
+}
+
 export default function GussTheSwift() {
     // Static values
     const qwertyLayout = [
@@ -100,16 +112,11 @@ export default function GussTheSwift() {
                 prevLetters :
                 [...prevLetters, letter]
         )
-
     }
 
     function startNewGame() {
         setGuessedLetters([])
         loadRandomSong()
-        trackEvent("new_game", {
-            song: currentSong,
-            album: currentAlbum
-        })
     }
 
     const songElements = currentSong.split(" ").map((word, wi) => (
@@ -187,11 +194,6 @@ export default function GussTheSwift() {
 
     function renderGameStatus() {
         if (!isGameOver && isLastGuessIncorrect) {
-            trackEvent("wrong_guess", {
-                song: currentSong,
-                album: currentAlbum,
-                wrongCount: wrongGuessCount + 1
-            })
             return (
                 <span className="game-result">
                     <h4>
@@ -237,15 +239,6 @@ export default function GussTheSwift() {
         return <span className="game-result">
             <h4>{getRandomPhrase(encouragePhrases)}</h4>
         </span>
-    }
-
-    //Add GA4
-    function trackEvent(eventName, params = {}) {
-        if (window.gtag) {
-            window.gtag("event", eventName, params)
-        } else {
-            console.warn("GA4 not loaded yet:", eventName, params)
-        }
     }
 
     return (

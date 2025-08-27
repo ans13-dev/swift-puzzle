@@ -8,6 +8,18 @@ import ReactGA from 'react-ga4';
 const TRACKING_ID = "G-P31J01WKGG";
 
 
+function trackEvent(eventName, params = {}) {
+    if (window.dataLayer) {
+        window.dataLayer.push({
+            event: eventName,
+            ...params
+        });
+        console.log("DataLayer event pushed:", eventName, params);
+    } else {
+        console.warn("DataLayer not loaded yet:", eventName, params);
+    }
+}
+
 export default function GussTheSwift() {
     // Static values
     const qwertyLayout = [
@@ -107,7 +119,6 @@ export default function GussTheSwift() {
                 prevLetters :
                 [...prevLetters, letter]
         )
-
     }
 
     function startNewGame() {

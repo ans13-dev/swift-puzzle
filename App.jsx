@@ -5,7 +5,7 @@ import { albumList } from "./albumList"
 import Confetti from "react-confetti"
 import { useWindowSize } from "./utils"
 import ReactGA from 'react-ga4';
-const TRACKING_ID = "G-P31J01WKGG";
+const TRACKING_ID = "G-18K7C647SM";
 
 
 function trackEvent(eventName, params = {}) {
@@ -219,14 +219,17 @@ export default function GussTheSwift() {
         }
 
         if (isGameWon) {
-            ReactGA.event("game_won", {
-                category: "Game",
-                label: "won",
-                song: currentSong,
-                album: currentAlbum,
-                totalWrongGuesses: wrongGuessCount,
-                totalGuesses: guessedLetters.length
-            })
+            if (window.dataLayer) {
+                window.dataLayer.push({
+                    event: "game_won",
+                    category: "Game",
+                    label: "won",
+                    song: currentSong,
+                    album: currentAlbum,
+                    totalWrongGuesses: wrongGuessCount,
+                    totalGuesses: guessedLetters.length
+                });
+            }
             return (
                 <span className="game-result">
                     <h4 className="flip-text" onClick={startNewGame}>{showNewGame ? "New Game ✨" : "You win ! 🎉"}</h4>
@@ -234,12 +237,17 @@ export default function GussTheSwift() {
             )
         }
         if (isGameLost) {
-            ReactGA.event("game_lost", {
-                song: currentSong,
-                album: currentAlbum,
-                totalWrongGuesses: wrongGuessCount,
-                totalGuesses: guessedLetters.length
-            })
+            if (window.dataLayer) {
+                window.dataLayer.push({
+                    event: "game_lost",
+                    category: "Game",
+                    label: "won",
+                    song: currentSong,
+                    album: currentAlbum,
+                    totalWrongGuesses: wrongGuessCount,
+                    totalGuesses: guessedLetters.length
+                });
+            }
             return (
                 <span className="game-result">
                     <h4 className="flip-text" onClick={startNewGame}>{showNewGame ? "New Game ✨" : "Game over ! ☠️"}</h4>

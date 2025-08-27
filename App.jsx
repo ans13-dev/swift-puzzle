@@ -14,7 +14,6 @@ function trackEvent(eventName, params = {}) {
             event: eventName,
             ...params
         });
-        console.log("DataLayer event pushed:", eventName, params);
     } else {
         console.warn("DataLayer not loaded yet:", eventName, params);
     }
@@ -121,7 +120,12 @@ export default function GussTheSwift() {
         )
     }
 
-    function startNewGame() {
+    function startNewGame(obj) {
+        if (window.dataLayer) {
+            window.dataLayer.push(obj)
+        } else {
+            console.warn("dataLayer not found!", obj)
+        }
         setGuessedLetters([])
         loadRandomSong()
     }
@@ -201,14 +205,6 @@ export default function GussTheSwift() {
 
     function renderGameStatus() {
         if (!isGameOver && isLastGuessIncorrect) {
-            ReactGA.event("game_lost", {
-                category: "Game",
-                label: "lose",
-                song: currentSong,
-                album: currentAlbum,
-                totalWrongGuesses: wrongGuessCount,
-                totalGuesses: guessedLetters.length
-            })
             return (
                 <span className="game-result">
                     <h4>
@@ -219,38 +215,34 @@ export default function GussTheSwift() {
         }
 
         if (isGameWon) {
-            if (window.dataLayer) {
-                window.dataLayer.push({
-                    event: "game_won",
-                    category: "Game",
-                    label: "won",
-                    song: currentSong,
-                    album: currentAlbum,
-                    totalWrongGuesses: wrongGuessCount,
-                    totalGuesses: guessedLetters.length
-                });
-            }
             return (
                 <span className="game-result">
-                    <h4 className="flip-text" onClick={startNewGame}>{showNewGame ? "New Game ✨" : "You win ! 🎉"}</h4>
+                    <h4 className="flip-text" onClick={
+                        () => startNewGame(
+                            {
+                                event: "game_won",
+                                song_name: currentSong,
+                                album_name: currentAlbum,
+                                wrong_guesses: wrongGuessCount,
+                                total_guesses: guessedLetters.length
+                            }
+                        )}>{showNewGame ? "New Game ✨" : "You win ! 🎉"}</h4>
                 </span>
             )
         }
         if (isGameLost) {
-            if (window.dataLayer) {
-                window.dataLayer.push({
-                    event: "game_lost",
-                    category: "Game",
-                    label: "won",
-                    song: currentSong,
-                    album: currentAlbum,
-                    totalWrongGuesses: wrongGuessCount,
-                    totalGuesses: guessedLetters.length
-                });
-            }
             return (
                 <span className="game-result">
-                    <h4 className="flip-text" onClick={startNewGame}>{showNewGame ? "New Game ✨" : "Game over ! ☠️"}</h4>
+                    <h4 className="flip-text" onClick={
+                        () => startNewGame(
+                            {
+                                event: "game_lost",
+                                song_name: currentSong,
+                                album_name: currentAlbum,
+                                wrong_guesses: wrongGuessCount,
+                                total_guesses: guessedLetters.length
+                            }
+                        )}>{showNewGame ? "New Game ✨" : "Game over ! ☠️"}</h4>
                 </span>
             )
         }

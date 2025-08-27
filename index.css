@@ -20,6 +20,9 @@ main {
     border-radius: 16px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
     backdrop-filter: blur(6px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 header {
@@ -74,9 +77,9 @@ section.game-status {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 100%;
+    width: 80%;
     border-radius: 4px;
-    margin-block: 20px;
+    margin-block: 25px;
     background: url("/assets/orangeGlitter.png") repeat;
     background-size: cover;
     color: white;
@@ -109,7 +112,7 @@ section.word {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 20px;
+    gap: 40px;
     margin-top: 20px;
 }
 
@@ -149,72 +152,78 @@ section.word {
 .word-block>span.non-letter {
     background-color: transparent;
     border-bottom: none;
+    width: 25px;
 }
 
 /*KEYBOARD*/
 section.keyboard {
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
     justify-content: center;
 }
 
-section.keyboard>button {
-    height: 65px;
-    width: 65px;
-    font-size: 1.5rem;
-    background-color: #D7D7D7;
-    border: 1px solid #D7D7D7;
-    border-radius: 3px;
-    cursor: pointer;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+section.keyboard .keyboard-row {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 12px;
 }
 
-section.keyboard>button.correct {
+section.keyboard button {
+    height: 60px;
+    width: 60px;
+    font-size: 1.3rem;
+    background-color: #D7D7D7;
+    border: 1px solid #D7D7D7;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    color: #000;
+    text-shadow: none;
+    transition: transform 0.1s ease, background-color 0.2s ease;
+}
+
+section.keyboard button.correct {
     background-color: rgba(109, 193, 176, 1);
 }
 
-section.keyboard>button.wrong {
+section.keyboard button.wrong {
     background-color: #BD4A24;
 }
 
-section.keyboard>button:disabled {
+section.keyboard button:disabled {
     cursor: not-allowed;
-    opacity: 0.5
+    opacity: 0.5;
 }
 
 /*GAME RESULT*/
 .game-result {
     position: relative;
     display: inline-block;
+    padding: 0.6rem 1.2rem;
+    border-radius: 10px;
+    text-align: center;
+    margin: 0 auto;
+    height: 45px;
 }
 
-.game-result>h3 {
+
+.game-result>h4 {
     text-shadow: 1px 1px 4px #000;
+    margin: 0;
 }
 
-.game-result .new-game {
-    width: 100%;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+.flip-text {
+    text-shadow: 1px 1px 4px #000;
     cursor: pointer;
-    font-size: 1.1rem;
-    opacity: 0;
-    background: white;
-    color: black;
-    padding: 10px 20px;
-    border-radius: 8px;
-    border: none;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    transition: opacity 0.3s ease;
 }
 
-.game-result:hover .new-game {
-    display: block;
-    opacity: 1;
-}
 
 .sr-only {
     position: absolute;
@@ -245,8 +254,9 @@ section.keyboard>button:disabled {
 }
 
 .tooltip-icon {
-    font-size: 18px;
-    padding: 4px;
+    font-size: clamp(1.25rem, 4vw, 1.5rem);
+    padding: 5px 0px;
+    margin-left: 5px;
 }
 
 .tooltip-icon-shine {
@@ -279,6 +289,7 @@ section.keyboard>button:disabled {
     visibility: hidden;
     background-color: #333;
     color: #fff;
+    text-shadow: none;
     text-align: center;
     padding: 6px 10px;
     border-radius: 4px;
@@ -286,17 +297,30 @@ section.keyboard>button:disabled {
     position: absolute;
     z-index: 1;
     bottom: 125%;
-    /* 在上方顯示 */
     left: 50%;
     transform: translateX(-75%);
-    opacity: 0.7;
+    opacity: 0.9;
+    /* 稍微提高透明度讓字更清楚 */
     transition: opacity 0.3s;
     white-space: nowrap;
+    -webkit-text-fill-color: transparent;
 }
 
 .tooltip-wrapper:hover .tooltip-text {
     visibility: visible;
     opacity: 1;
+}
+
+.tooltip-text>p {
+    background: none !important;
+    -webkit-background-clip: initial !important;
+    background-clip: initial !important;
+    -webkit-text-fill-color: initial !important;
+    color: #fff !important;
+    text-shadow: none !important;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    margin: 0px;
 }
 
 /*FOOTER*/
@@ -306,6 +330,10 @@ section.keyboard>button:disabled {
     color: rgba(0, 0, 0, 0.5);
     margin-top: 16px;
     padding: 8px 0;
+}
+
+.app-footer p {
+    margin: 0px;
 }
 
 .app-footer a {
@@ -320,12 +348,23 @@ section.keyboard>button:disabled {
 }
 
 @media (max-width: 600px) {
+    section.game-status {
+        width: 100%;
+    }
+
     section.keyboard {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        justify-content: center;
         max-width: 450px;
+    }
+
+    section.keyboard .keyboard-row {
+        gap: 5px;
+    }
+
+    section.keyboard button {
+        height: 45px;
+        width: 45px;
+        font-size: 1.2rem;
+        margin: 5px;
     }
 
     .word-block>span {
@@ -333,16 +372,10 @@ section.keyboard>button:disabled {
         width: 30px;
     }
 
-    section.keyboard>button {
-        height: 40px;
-        width: 40px;
-        font-size: 1.1rem;
-    }
-
     .tooltip-text {
         white-space: normal;
         word-wrap: break-word;
-        width: 200px;
+        width: 250px;
     }
 
     .game-result .overlay {

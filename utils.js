@@ -1,17 +1,19 @@
 import { useState, useEffect } from 'react';
+let cachedSongs = null
 
 export async function getRandomSong() {
     try {
-        const res = await fetch("https://taylor-swift-api.sarbo.workers.dev/songs");
-        const data = await res.json();
-        const randomSongId = Math.floor(Math.random() * data.length);
-        return data[randomSongId]
-    }
-    catch (err) {
+        if (!cachedSongs) {
+            const res = await fetch("https://taylor-swift-api.sarbo.workers.dev/songs")
+            cachedSongs = await res.json()
+        }
+        const randomSongId = Math.floor(Math.random() * cachedSongs.length)
+        return cachedSongs[randomSongId]
+    } catch (err) {
         if (err.name === "AbortError") {
-            console.log("Fetch aborted");
+            console.log("Fetch aborted")
         } else {
-            console.error("Fetch error:", err);
+            console.error("Fetch error:", err)
         }
     }
 }

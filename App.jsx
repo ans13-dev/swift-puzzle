@@ -95,6 +95,28 @@ export default function GussTheSwift() {
         };
     }, [isGameOver, addGuessedLetter]);
 
+    useEffect(() => {
+        if (isGameLost && window.dataLayer) {
+            window.dataLayer.push({
+                event: "game_lost",
+                song_name: currentSong,
+                album_name: currentAlbum,
+                wrong_guesses: wrongGuessCount,
+                total_guesses: guessedLetters.length
+            })
+        }
+
+        if (isGameWon && window.dataLayer) {
+            window.dataLayer.push({
+                event: "game_won",
+                song_name: currentSong,
+                album_name: currentAlbum,
+                wrong_guesses: wrongGuessCount,
+                total_guesses: guessedLetters.length
+            })
+        }
+    }, [isGameLost, isGameWon])
+
     function isLetter(char) {
         return /^[A-Z]$/i.test(char);
     }
@@ -120,12 +142,7 @@ export default function GussTheSwift() {
         )
     }
 
-    function startNewGame(obj) {
-        if (window.dataLayer) {
-            window.dataLayer.push(obj)
-        } else {
-            console.warn("dataLayer not found!", obj)
-        }
+    function startNewGame() {
         setGuessedLetters([])
         loadRandomSong()
     }
@@ -217,32 +234,14 @@ export default function GussTheSwift() {
         if (isGameWon) {
             return (
                 <span className="game-result">
-                    <h4 className="flip-text" onClick={
-                        () => startNewGame(
-                            {
-                                event: "game_won",
-                                song_name: currentSong,
-                                album_name: currentAlbum,
-                                wrong_guesses: wrongGuessCount,
-                                total_guesses: guessedLetters.length
-                            }
-                        )}>{showNewGame ? "New Game ✨" : "You win ! 🎉"}</h4>
+                    <h4 className="flip-text" onClick={startNewGame}>{showNewGame ? "New Game ✨" : "You win ! 🎉"}</h4>
                 </span>
             )
         }
         if (isGameLost) {
             return (
                 <span className="game-result">
-                    <h4 className="flip-text" onClick={
-                        () => startNewGame(
-                            {
-                                event: "game_lost",
-                                song_name: currentSong,
-                                album_name: currentAlbum,
-                                wrong_guesses: wrongGuessCount,
-                                total_guesses: guessedLetters.length
-                            }
-                        )}>{showNewGame ? "New Game ✨" : "Game over ! ☠️"}</h4>
+                    <h4 className="flip-text" onClick={startNewGame}>{showNewGame ? "New Game ✨" : "Game over ! ☠️"}</h4>
                 </span>
             )
         }

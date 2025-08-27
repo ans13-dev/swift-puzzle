@@ -1,5 +1,5 @@
 # Preview
-![image]("https://github.com/ans13-dev/swift-puzzle/blob/main/assets/preview.PNG?raw=true")
+![image](https://github.com/ans13-dev/swift-puzzle/blob/main/assets/preview.PNG?raw=true)
 
 # Getting Started
 Install the dependencies and run the project

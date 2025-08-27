@@ -258,8 +258,6 @@ export default function GussTheSwift() {
         </span>
     }
 
-    //Add GA4
-    ReactGA.send({ hitType: "pageview", page: window.location.pathname });
 
 
 

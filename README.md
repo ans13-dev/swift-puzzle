@@ -1,5 +1,5 @@
 # Preview
-[# Click this](https://gentle-pixie-b40f42.netlify.app/)
+![image]("https://github.com/ans13-dev/swift-puzzle/blob/main/assets/preview.PNG?raw=true")
 
 # Getting Started
 Install the dependencies and run the project

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { FaSpotify, FaYoutube } from "react-icons/fa";
+import { FaSpotify, FaYoutube, FaApple } from "react-icons/fa";
 import { clsx } from "clsx"
 import { getRandomSong } from "./utils"
 import { albumList } from "./albumList"
@@ -189,9 +189,14 @@ export default function GussTheSwift() {
             );
         }
 
-        const query = encodeURIComponent(currentSong + 'Taylor Swift');
-        const spotifyUrl = `https://open.spotify.com/search/${query}`;
-        const youtubeUrl = `https://www.youtube.com/results?search_query=${query}`;
+        const querySpotify = encodeURIComponent(`track:${currentSong} artist:Taylor Swift`);
+        const queryYoutube = encodeURIComponent(`${currentSong} Taylor Swift`);
+        const queryApple = encodeURIComponent(`${currentSong} Taylor Swift`);
+
+        const spotifyUrl = `https://open.spotify.com/search/${querySpotify}`;
+        const youtubeUrl = `https://www.youtube.com/results?search_query=${queryYoutube}`;
+        const appleMusicUrl = `https://music.apple.com/search?term=${queryApple}`;
+
 
         return (
             <div className="result-container">
@@ -206,6 +211,14 @@ export default function GussTheSwift() {
                         className="icon spotify"
                     >
                         <FaSpotify />
+                    </a>
+                    <a
+                        href={appleMusicUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="icon apple"
+                    >
+                        <FaApple />
                     </a>
                     <a
                         href={youtubeUrl}

@@ -105,6 +105,10 @@ header>p {
     color: #ff0000;
 }
 
+.icon.apple {
+    color: #000000;
+}
+
 .icon:hover {
     transform: scale(1.1);
     opacity: 0.8;
@@ -387,6 +391,12 @@ section.keyboard button:disabled {
 }
 
 @media (max-width: 600px) {
+    .icon-links {
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-left: 12px;
+    }
+
     section.game-status {
         width: 100%;
     }

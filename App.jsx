@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import { FaSpotify, FaYoutube } from "react-icons/fa";
 import { clsx } from "clsx"
 import { getRandomSong } from "./utils"
 import { albumList } from "./albumList"
@@ -174,6 +175,50 @@ export default function GussTheSwift() {
             })}
         </span>
     ));
+    function GameResult() {
+        if (!isGameOver) {
+            return (
+                hitPoints.map((h, i) => (
+                    <span
+                        key={i}
+                        className={`heart ${i < hitPoints.length - wrongGuessCount ? "alive" : "dead"}`}
+                    >
+                        {h}
+                    </span>
+                ))
+            );
+        }
+
+        const query = encodeURIComponent(currentSong + 'Taylor Swift');
+        const spotifyUrl = `https://open.spotify.com/search/${query}`;
+        const youtubeUrl = `https://www.youtube.com/results?search_query=${query}`;
+
+        return (
+            <div className="result-container">
+                <p className="result-text">
+                    {isGameWon ? "Let's review this : " : "Never heard it before ? "}{" "}
+                </p>
+                <div className="icon-links">
+                    <a
+                        href={spotifyUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="icon spotify"
+                    >
+                        <FaSpotify />
+                    </a>
+                    <a
+                        href={youtubeUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="icon youtube"
+                    >
+                        <FaYoutube />
+                    </a>
+                </div>
+            </div>
+        );
+    }
 
     function KeyboardElements() {
         const isMobile = width <= 768
@@ -277,14 +322,7 @@ export default function GussTheSwift() {
             </header>
 
             <section className="lives">
-                {hitPoints.map((h, i) => (
-                    <span
-                        key={i}
-                        className={`heart ${i < hitPoints.length - wrongGuessCount ? "alive" : "dead"}`}
-                    >
-                        {h}
-                    </span>
-                ))}
+                <GameResult />
             </section>
 
             <section className="word">

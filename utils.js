@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { collection, addDoc } from "firebase/firestore";
+import { db } from "./firebase";
 let cachedSongs = null
 
 export async function getRandomSong() {
@@ -42,4 +44,22 @@ export function useWindowSize() {
     }, []); // 空陣列表示只在 component mount/unmount 時執行
 
     return windowSize;
+}
+
+
+
+export async function logGameResult({ result, song, album, wrongGuesses, totalGuesses, duration }) {
+    try {
+        await addDoc(collection(db, "game_sessions"), {
+            result,                 // "won" 或 "lost"
+            song_name: song,
+            album_name: album,
+            wrong_guesses: wrongGuesses,
+            total_guesses: totalGuesses,
+            duration,               // 秒數
+            created_at: new Date()  // Firestore 會存 timestamp
+        })
+    } catch (e) {
+        console.error("Error adding doc: ", e)
+    }
 }

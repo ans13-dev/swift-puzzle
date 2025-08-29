@@ -5,20 +5,7 @@ import { getRandomSong } from "./utils"
 import { albumList } from "./albumList"
 import Confetti from "react-confetti"
 import { useWindowSize } from "./utils"
-import ReactGA from 'react-ga4';
-const TRACKING_ID = "G-18K7C647SM";
-
-
-function trackEvent(eventName, params = {}) {
-    if (window.dataLayer) {
-        window.dataLayer.push({
-            event: eventName,
-            ...params
-        });
-    } else {
-        console.warn("DataLayer not loaded yet:", eventName, params);
-    }
-}
+import { logGameResult } from "./utils";
 
 export default function GussTheSwift() {
     // Static values
@@ -54,6 +41,7 @@ export default function GussTheSwift() {
     const [currentSong, setCurrentSong] = useState("")
     const [currentAlbum, setCurrentAlbum] = useState("")
     const [guessedLetters, setGuessedLetters] = useState([])
+    const [gameStartTime, setGameStartTime] = useState(null);
     const { width, height } = useWindowSize()
 
     // Derived values
@@ -70,10 +58,6 @@ export default function GussTheSwift() {
 
 
     useEffect(() => {
-        ReactGA.initialize(TRACKING_ID);
-        ReactGA.send({
-            hitType: "pageview", page: "/landingpage", title: "Landing Page"
-        })
         const interval = setInterval(() => {
             setShowNewGame(prev => !prev);
         }, 2000); // 每2秒切換一次
@@ -97,26 +81,28 @@ export default function GussTheSwift() {
     }, [isGameOver, addGuessedLetter]);
 
     useEffect(() => {
-        if (isGameLost && window.dataLayer) {
-            window.dataLayer.push({
-                event: "game_lost",
-                song_name: currentSong,
-                album_name: currentAlbum,
-                wrong_guesses: wrongGuessCount,
-                total_guesses: guessedLetters.length
-            })
+        // 當遊戲開始時，記錄開始時間
+        if (isInitialized && !isGameOver && !gameStartTime) {
+            setGameStartTime(Date.now());
         }
 
-        if (isGameWon && window.dataLayer) {
-            window.dataLayer.push({
-                event: "game_won",
-                song_name: currentSong,
-                album_name: currentAlbum,
-                wrong_guesses: wrongGuessCount,
-                total_guesses: guessedLetters.length
-            })
+        // 當遊戲結束時，觸發資料記錄
+        if (isGameOver && gameStartTime) {
+            const duration = Math.floor((Date.now() - gameStartTime) / 1000);
+            const result = isGameWon ? "won" : "lost";
+
+            logGameResult({
+                result,
+                song: currentSong,
+                album: currentAlbum,
+                wrongGuesses: wrongGuessCount,
+                totalGuesses: guessedLetters.length,
+                duration,
+            });
+
+            setGameStartTime(null); // 重設遊戲開始時間
         }
-    }, [isGameLost, isGameWon])
+    }, [isGameOver, isInitialized]); // 監聽遊戲狀態的改變
 
     function isLetter(char) {
         return /^[A-Z]$/i.test(char);

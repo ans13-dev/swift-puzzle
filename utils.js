@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { collection, addDoc } from "firebase/firestore";
-import { db } from "./firebase";
+import { getAnalytics, logEvent } from "firebase/analytics";
+import { app, db } from "./firebase";
+
 let cachedSongs = null
+const analytics = getAnalytics(app);
 
 export async function getRandomSong() {
     try {
@@ -46,9 +49,7 @@ export function useWindowSize() {
     return windowSize;
 }
 
-
-
-export async function logGameResult({ result, song, album, wrongGuesses, totalGuesses, duration }) {
+export async function logGameResult({ result, song, album, wrongGuesses, totalGuesses, hint, duration }) {
     try {
         await addDoc(collection(db, "game_sessions"), {
             result,                 // "won" 或 "lost"
@@ -56,10 +57,15 @@ export async function logGameResult({ result, song, album, wrongGuesses, totalGu
             album_name: album,
             wrong_guesses: wrongGuesses,
             total_guesses: totalGuesses,
+            hint,
             duration,               // 秒數
             created_at: new Date()  // Firestore 會存 timestamp
         })
     } catch (e) {
         console.error("Error adding doc: ", e)
     }
+}
+
+export function logGameEvent(eventName, params) {
+    logEvent(analytics, eventName, params);
 }

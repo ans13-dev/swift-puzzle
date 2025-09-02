@@ -4,8 +4,7 @@ import { clsx } from "clsx"
 import { getRandomSong } from "./utils"
 import { albumList } from "./albumList"
 import Confetti from "react-confetti"
-import { useWindowSize } from "./utils"
-import { logGameResult } from "./utils";
+import { useWindowSize, logGameEvent } from "./utils"
 
 export default function GussTheSwift() {
     // Static values
@@ -38,6 +37,7 @@ export default function GussTheSwift() {
     // State values
     const [isInitialized, setIsInitialized] = useState(false)
     const [showNewGame, setShowNewGame] = useState(false);
+    const [hovered, setHovered] = useState(false);
     const [currentSong, setCurrentSong] = useState("")
     const [currentAlbum, setCurrentAlbum] = useState("")
     const [guessedLetters, setGuessedLetters] = useState([])
@@ -57,52 +57,61 @@ export default function GussTheSwift() {
 
 
 
+    //初始化
     useEffect(() => {
         const interval = setInterval(() => {
             setShowNewGame(prev => !prev);
-        }, 2000); // 每2秒切換一次
-        loadRandomSong().then(() => setIsInitialized(true))
-        return () => clearInterval(interval);
-    }, [])
+        }, 2000);
 
+        loadRandomSong().then(() => setIsInitialized(true));
+
+        return () => clearInterval(interval);
+    }, []);
+
+
+    //鍵盤事件監聽
     useEffect(() => {
         function handleKeyDown(event) {
-            if (isGameOver) {
-                return;
-            }
-            if (event.key.match(/^[a-z]$/i)) {
+            if (isGameOver) return;
+
+            if (/^[a-z]$/i.test(event.key)) {
                 addGuessedLetter(event.key.toLowerCase());
             }
         }
-        window.addEventListener('keydown', handleKeyDown);
-        return () => {
-            window.removeEventListener('keydown', handleKeyDown);
-        };
+
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
     }, [isGameOver, addGuessedLetter]);
 
+
+    //遊戲開始時間管理
     useEffect(() => {
-        // 當遊戲開始時，記錄開始時間
         if (isInitialized && !isGameOver && !gameStartTime) {
             setGameStartTime(Date.now());
         }
+    }, [isInitialized, isGameOver, gameStartTime]);
 
-        // 當遊戲結束時，觸發資料記錄
+
+    //遊戲結束紀錄
+    useEffect(() => {
         if (isGameOver && gameStartTime) {
             const duration = Math.floor((Date.now() - gameStartTime) / 1000);
             const result = isGameWon ? "won" : "lost";
 
-            logGameResult({
-                result,
+            logGameEvent("game_end", {
                 song: currentSong,
                 album: currentAlbum,
-                wrongGuesses: wrongGuessCount,
-                totalGuesses: guessedLetters.length,
-                duration,
+                result: result,
+                total_attempts: guessedLetters.length,
+                wrong_attempts: wrongGuessCount,
+                duration_ms: duration,
+                hint_used: hovered,
             });
 
-            setGameStartTime(null); // 重設遊戲開始時間
+            setGameStartTime(null); // reset
         }
-    }, [isGameOver, isInitialized]); // 監聽遊戲狀態的改變
+    }, [isGameOver, gameStartTime, isGameWon, currentSong, currentAlbum, guessedLetters, wrongGuessCount, hovered]);
+
 
     function isLetter(char) {
         return /^[A-Z]$/i.test(char);
@@ -111,6 +120,12 @@ export default function GussTheSwift() {
     function getRandomPhrase(phrases) {
         const randomIndex = Math.floor(Math.random() * phrases.length);
         return phrases[randomIndex];
+    }
+
+    function handleHover() {
+        if (!hovered) {
+            setHovered(true);
+        }
     }
 
     async function loadRandomSong() {
@@ -122,11 +137,23 @@ export default function GussTheSwift() {
     }
 
     function addGuessedLetter(letter) {
-        setGuessedLetters(prevLetters =>
-            prevLetters.includes(letter) ?
-                prevLetters :
-                [...prevLetters, letter]
-        )
+        setGuessedLetters(prevLetters => {
+            if (prevLetters.includes(letter)) return prevLetters;
+
+            const updated = [...prevLetters, letter];
+            const isCorrect = currentSong.toLowerCase().includes(letter);
+
+            // event-based log
+            logGameEvent("song_guess", {
+                song_id: currentSong,
+                album: currentAlbum,
+                attempt_num: updated.length,
+                guess_correct: isCorrect,
+                elapsed_time_ms: gameStartTime ? Date.now() - gameStartTime : null,
+            });
+
+            return updated;
+        });
     }
 
     function startNewGame() {
@@ -309,7 +336,11 @@ export default function GussTheSwift() {
             {isGameWon && <Confetti width={width} height={height} />}
             <header>
                 <h1>Guess a Taylor Swift's Song: 7 Tries
-                    {wrongGuessCount == 6 ? <div className="tooltip-wrapper">
+                    {wrongGuessCount == 6 ? <div
+                        className="tooltip-wrapper"
+                        onMouseEnter={handleHover}   // 桌面 hover
+                        onTouchStart={handleHover}  // 手機觸控
+                    >
                         <span className="tooltip-icon-shine">🎵</span>
                         <div className="tooltip-text">
                             <p>{`Hint: The Song is in the Album "${currentAlbum}"`}</p>
@@ -347,6 +378,7 @@ export default function GussTheSwift() {
                         GitHub
                     </a>
                 </p>
+                <p>{`Privacy Policy: This game collects basic gameplay data (results, attempts, and time spent) to improve the game experience. No personal information is collected or shared.`}</p>
             </footer>
         </main >
     )

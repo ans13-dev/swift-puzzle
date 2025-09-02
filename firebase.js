@@ -8,9 +8,10 @@ const firebaseConfig = {
       projectId: "swiftpuzzle-82bf4",
       storageBucket: "swiftpuzzle-82bf4.firebasestorage.app",
       messagingSenderId: "1058017745626",
-      appId: "1:1058017745626:web:af284c892bd0448056e3e3"
+      appId: "1:1058017745626:web:af284c892bd0448056e3e3",
+      measurementId: "G-8QRVS8B4WT"
 };
 
 
-const app = initializeApp(firebaseConfig);
+export const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app)

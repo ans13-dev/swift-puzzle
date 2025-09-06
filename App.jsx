@@ -24,7 +24,7 @@ export default function GussTheSwift() {
         ]
     const hitPoints = ["💚", "💛", "💜", "❤️", "💙", "🖤", "🤍"]
     const encouragePhrases = [
-        "Look what you just did.",
+        "Look what you just did!",
         "You're so gorgeous!",
         "This is our song.",
         "Crushed it!",
@@ -40,6 +40,7 @@ export default function GussTheSwift() {
     const [hovered, setHovered] = useState(false);
     const [currentSong, setCurrentSong] = useState("")
     const [currentAlbum, setCurrentAlbum] = useState("")
+    const [currentPhrase, setCurrentPhrase] = useState("");
     const [guessedLetters, setGuessedLetters] = useState([])
     const [gameStartTime, setGameStartTime] = useState(null);
     const { width, height } = useWindowSize()
@@ -128,6 +129,10 @@ export default function GussTheSwift() {
         }
     }
 
+    function updatePhrase() {
+        setCurrentPhrase(getRandomPhrase(encouragePhrases));
+    }
+
     async function loadRandomSong() {
         const song = await getRandomSong()
         const albumObj = albumList.filter(album => album.album_id == song.album_id)
@@ -143,14 +148,9 @@ export default function GussTheSwift() {
             const updated = [...prevLetters, letter];
             const isCorrect = currentSong.toLowerCase().includes(letter);
 
-            // event-based log
-            logGameEvent("song_guess", {
-                song_id: currentSong,
-                album: currentAlbum,
-                attempt_num: updated.length,
-                guess_correct: isCorrect,
-                elapsed_time_ms: gameStartTime ? Date.now() - gameStartTime : null,
-            });
+            if (isCorrect) {
+                updatePhrase()
+            }
 
             return updated;
         });
@@ -319,12 +319,12 @@ export default function GussTheSwift() {
 
         if (!isGameOver && wrongGuessCount == 0 && guessedLetters == 0) {
             return <span className="game-result">
-                <h4>Are you ready for it?</h4>
+                <h4>...Ready for It?</h4>
             </span>
         }
 
         return <span className="game-result">
-            <h4>{getRandomPhrase(encouragePhrases)}</h4>
+            <h4>{currentPhrase}</h4>
         </span>
     }
 
